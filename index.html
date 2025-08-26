@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ifrit Inventory • Coleção Final Fantasy</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <i class="fa-solid fa-fire-flame-curved"></i>
+      <span>Ifrit Inventory</span>
+    </div>
+    <div class="actions">
+      <input id="searchInput" type="search" placeholder="Buscar itens (nome, plataforma, notas)" />
+      <select id="sortSelect" title="Ordenar por">
+        <option value="name-asc">Nome (A→Z)</option>
+        <option value="name-desc">Nome (Z→A)</option>
+        <option value="year-desc">Ano (mais novo)</option>
+        <option value="year-asc">Ano (mais antigo)</option>
+        <option value="rarity-desc">Raridade (alta)</option>
+        <option value="rarity-asc">Raridade (baixa)</option>
+        <option value="lottery-asc">Ordem da Loteria</option>
+      </select>
+      <button id="addItemBtn" class="btn primary"><i class="fa-solid fa-plus"></i> Adicionar item</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Categorias</h3>
+      <nav id="categoryList" class="category-list">
+        <!-- Populado via JS -->
+      </nav>
+
+      <h3>Filtros</h3>
+      <div class="filters">
+        <label class="filter">
+          <span>Somente lacrados</span>
+          <input type="checkbox" id="sealedOnly" />
+        </label>
+        <label class="filter">
+          <span>Compreensivo</span>
+          <select id="platformFilter">
+            <option value="">Todas plataformas</option>
+            <option>PS1</option>
+            <option>PS2</option>
+            <option>PS3</option>
+            <option>PS4</option>
+            <option>PS5</option>
+            <option>Switch</option>
+            <option>PC</option>
+            <option>Livro</option>
+            <option>Merch</option>
+          </select>
+        </label>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="stats" id="statsBar">
+        <!-- KPIs renderizados via JS -->
+      </div>
+      <section>
+        <div id="itemsGrid" class="grid">
+          <!-- Cards renderizados via JS -->
+        </div>
+        <div id="emptyState" class="empty" hidden>
+          <i class="fa-regular fa-folder-open"></i>
+          <p>Nenhum item encontrado com os filtros atuais.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <span>© Ifrit Inventory — Final Fantasy Collection Organizer</span>
+  </footer>
+
+  <!-- Modal: Adicionar Item -->
+  <div id="addItemModal" class="modal" aria-hidden="true" hidden>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Adicionar item</h3>
+        <button type="button" class="icon-btn" id="closeAddModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="addItemForm" class="modal-body">
+        <div class="form-grid">
+          <label>
+            <span>Nome</span>
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            <span>Categoria</span>
+            <select name="category" id="addCategory" required>
+              <!-- opções preenchidas via JS -->
+            </select>
+          </label>
+          <label>
+            <span>Plataforma</span>
+            <input type="text" name="platform" placeholder="PS1, PS2, PS5, Livro, Merch..." />
+          </label>
+          <label>
+            <span>Ano</span>
+            <input type="number" name="year" min="1987" max="2100" placeholder="1997" />
+          </label>
+          <label>
+            <span>Raridade (0–5)</span>
+            <input type="number" name="rarity" min="0" max="5" value="0" />
+          </label>
+          <label class="inline">
+            <input type="checkbox" name="sealed" />
+            <span>Selado</span>
+          </label>
+        </div>
+
+        <label class="block">
+          <span>Notas</span>
+          <textarea name="notes" rows="3" placeholder="Detalhes do item, edição, estado, etc."></textarea>
+        </label>
+
+        <div class="image-field">
+          <div class="preview" id="imagePreview"><i class="fa-regular fa-image"></i></div>
+          <div class="image-actions">
+            <label class="btn">
+              <i class="fa-solid fa-upload"></i> Selecionar foto
+              <input id="imageInput" type="file" accept="image/*" hidden />
+            </label>
+            <button type="button" class="btn" id="clearImageBtn"><i class="fa-solid fa-trash"></i> Remover</button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn" id="cancelAddBtn">Cancelar</button>
+          <button type="submit" class="btn primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
