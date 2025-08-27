@@ -10,24 +10,70 @@
       'Jogos',
       'Livros',
       'Loteria Final Fantasy VII Remake',
+      'Loteria Final Fantasy IX',
       'Loteria Final Fantasy XVI',
       'Trilhas Sonoras',
       'Merch',
-      'Artbooks',
+      'Artbook/Databook',
       'Cartas'
     ],
     activeCategory: 'Todos',
     query: '',
     sort: 'name-asc',
-    sealedOnly: false,
     platform: ''
+  }
+
+  // Helpers
+  function prizeLevel(item){
+    if (!item || !item.name) return ''
+    // Apenas para categorias de loteria
+    const isLottery = /^Loteria /.test(item.category || '')
+    if (!isLottery) return ''
+    const name = String(item.name)
+    // Prêmio Raro / End Prize
+    if (/Pr[eê]mio\s+Raro/i.test(name) || /End\s*Prize/i.test(name)) return 'End'
+    // Prêmio/Prêmios A-G
+    const m = name.match(/^Pr[eê]m(i|í)o?s?\s+([A-G]):/i)
+    return m ? `Prêmio ${m[2].toUpperCase()}` : ''
+  }
+
+  function ffxviPrizeBDesign(item){
+    // Badge opcional para identificar o "design" nos itens da Loteria FFXVI prêmio B
+    if (!item || !item.name || item.category !== 'Loteria Final Fantasy XVI') return ''
+    const m = String(item.name).match(/^Pr[eê]mio\s+B:\s*Figure Collection\s+—\s*(.+)$/i)
+    return m ? m[1] : ''
   }
 
   // Inicialização
   document.addEventListener('DOMContentLoaded', () => {
-    state.items = sampleData()
+    state.items = loadItems() || sampleData()
     // Próximo ID baseado no maior existente
     state.nextId = state.items.reduce((m,i)=> Math.max(m, i.id||0), 0) + 1
+    // Migração única: apagar todas as fotos existentes
+    const MIGRATION_WIPE_PHOTOS_KEY = 'ifritInventory.wipePhotos.m1'
+    if (!localStorage.getItem(MIGRATION_WIPE_PHOTOS_KEY)){
+      let changed = false
+      state.items.forEach(it => { if (it && it.image){ delete it.image; changed = true } })
+      if (changed){ saveItems() }
+      try{ localStorage.setItem(MIGRATION_WIPE_PHOTOS_KEY, '1') }catch(e){}
+    }
+    // Migração: renomear categoria Artbooks -> Artbook/Databook e semear Ultimania Vol. 2 e 3
+    (function migrateAndSeed(){
+      let changed = false
+      state.items.forEach(it => {
+        if (it && it.category === 'Artbooks') { it.category = 'Artbook/Databook'; changed = true }
+      })
+      const ensureItem = (name) => {
+        const exists = state.items.some(i => (i.name||'').toLowerCase() === name.toLowerCase())
+        if (!exists){
+          state.items.push({ id: ++state.nextId, name, category: 'Artbook/Databook', rarity: 0 })
+          changed = true
+        }
+      }
+      ensureItem('Final Fantasy Ultimania Archive Vol. 2')
+      ensureItem('Final Fantasy Ultimania Archive Vol. 3')
+      if (changed){ saveItems() }
+    })()
     bindUI()
     renderCategories()
     prepareAddModal()
@@ -38,15 +84,44 @@
   function bindUI(){
     const search = document.getElementById('searchInput')
     const sort = document.getElementById('sortSelect')
-    const sealed = document.getElementById('sealedOnly')
     const platform = document.getElementById('platformFilter')
     const addBtn = document.getElementById('addItemBtn')
 
     search.addEventListener('input', e => { state.query = e.target.value.trim().toLowerCase(); applyFilters() })
     sort.addEventListener('change', e => { state.sort = e.target.value; applyFilters() })
-    sealed.addEventListener('change', e => { state.sealedOnly = e.target.checked; applyFilters() })
     platform.addEventListener('change', e => { state.platform = e.target.value; applyFilters() })
-    if (addBtn) addBtn.addEventListener('click', openAddModal)
+    if (addBtn) addBtn.addEventListener('click', () => {
+      const cat = state.activeCategory !== 'Todos' ? state.activeCategory : ''
+      openAddModal({ category: cat })
+    })
+
+    // Backup: Exportar / Importar
+    const exportBtn = document.getElementById('exportBtn')
+    if (exportBtn){
+      exportBtn.addEventListener('click', () => exportItems())
+    }
+    const importInput = document.getElementById('importInput')
+    if (importInput){
+      importInput.addEventListener('change', async (e)=>{
+        const file = e.target.files && e.target.files[0]
+        if (!file) return
+        try{
+          await importItemsFromFile(file)
+          alert('Importação concluída com sucesso!')
+        }catch(err){
+          console.error(err)
+          alert('Falha ao importar JSON. Verifique o arquivo.')
+        }finally{
+          e.target.value = ''
+        }
+      })
+    }
+
+    // Restaurar banco (padrão)
+    const resetBtn = document.getElementById('resetDbBtn')
+    if (resetBtn){
+      resetBtn.addEventListener('click', () => resetDatabase())
+    }
   }
 
   // Categorias
@@ -82,9 +157,6 @@
         (i.notes || '').toLowerCase().includes(q)
       )
     }
-    if (state.sealedOnly) {
-      data = data.filter(i => !!i.sealed)
-    }
     if (state.platform) {
       data = data.filter(i => (i.platform || '') === state.platform)
     }
@@ -111,27 +183,25 @@
 
     state.filtered = data
     renderStats()
+    renderLotteryDashboard()
     renderGrid()
   }
 
   // KPIs
   function renderStats(){
     const el = document.getElementById('statsBar')
-    const total = state.filtered.length
-    const sealed = state.filtered.filter(i => i.sealed).length
-    const avgRarity = state.filtered.length
-      ? (state.filtered.reduce((s,i)=> s + (i.rarity||0), 0) / state.filtered.length)
+    // Todas as contagens consideram apenas itens com foto
+    const withPhoto = state.filtered.filter(i => !!i.image)
+    const total = withPhoto.length
+    const avgRarity = withPhoto.length
+      ? (withPhoto.reduce((s,i)=> s + (i.rarity||0), 0) / withPhoto.length)
       : 0
-    const cats = new Set(state.filtered.map(i => i.category))
+    const cats = new Set(withPhoto.map(i => i.category))
 
     el.innerHTML = `
       <div class="stat">
         <div class="label">Itens</div>
         <div class="value">${total}</div>
-      </div>
-      <div class="stat">
-        <div class="label">Selados</div>
-        <div class="value">${sealed}</div>
       </div>
       <div class="stat">
         <div class="label">Raridade média</div>
@@ -142,6 +212,40 @@
         <div class="value">${cats.size}</div>
       </div>
     `
+  }
+
+  // Dashboard de Loterias
+  function renderLotteryDashboard(){
+    const wrap = document.getElementById('lotteryDashboard')
+    if (!wrap) return
+    // Considera todas as loterias do estado completo, não apenas filtradas
+    const categories = Array.from(new Set(state.items
+      .filter(i => /^Loteria /.test(i.category||''))
+      .map(i => i.category)))
+
+    if (!categories.length){ wrap.innerHTML = ''; return }
+
+    const cards = categories.map(cat => {
+      const items = state.items.filter(i => i.category === cat)
+      const withOrder = items.filter(i => typeof i.lotteryOrder === 'number')
+      const expected = withOrder.length ? Math.max(...withOrder.map(i => i.lotteryOrder||0)) : items.length
+      // conta apenas itens com foto
+      if (withOrder.length){
+        const distinctWithPhoto = new Set(withOrder.filter(i => !!i.image).map(i => i.lotteryOrder))
+        var collected = distinctWithPhoto.size
+      } else {
+        var collected = items.filter(i => !!i.image).length
+      }
+      const pct = expected ? Math.min(100, Math.round((collected/expected)*100)) : 0
+      return `
+        <div class="dash-card">
+          <div class="dash-title">${cat}</div>
+          <div class="dash-row"><span>Completos</span><span class="dash-val">${collected} / ${expected} — ${pct}%</span></div>
+          <div class="progress" aria-label="Progresso ${pct}%"><span style="width:${pct}%"></span></div>
+        </div>
+      `
+    })
+    wrap.innerHTML = cards.join('')
   }
 
   // Grid
@@ -163,37 +267,40 @@
     const el = document.createElement('article')
     el.className = 'card'
 
-    const rarityStars = '★★★★★☆☆☆☆☆'.slice(5 - (item.rarity||0), 10 - (item.rarity||0)) // 5-base
-    const platformBadge = item.platform ? `<span class=\"badge\">${item.platform}</span>` : ''
-    const sealedBadge = item.sealed ? '<span class="badge ok">Selado</span>' : ''
+    const rarityStars = '★★★★★☆☆☆☆☆'.slice(5 - (item.rarity||0), 10 - (item.rarity||0))
+    const platformBadge = item.platform ? `<span class="badge">${item.platform}</span>` : ''
     const prize = prizeLevel(item)
-    const prizeBadge = prize ? `<span class=\"badge prize\">${prize}</span>` : ''
+    const tierClass = prize
+      ? (prize.toLowerCase() === 'end'
+          ? 'tier-end'
+          : (/^pr[eê]mio\s+([a-g])/i.test(prize) ? `tier-${prize.replace(/^Pr[eê]mio\s+/i,'').charAt(0).toLowerCase()}` : ''))
+      : ''
+    const prizeBadge = prize ? `<span class="badge prize ${tierClass}">${prize}</span>` : ''
     const design = ffxviPrizeBDesign(item)
-    const designBadge = design ? `<span class=\"badge design\">${design}</span>` : ''
+    const designBadge = design ? `<span class="badge design">${design}</span>` : ''
     const thumbContent = item.image
       ? `<img src="${item.image}" alt="${escapeAttr(item.name)}" />`
-      : (designIcon(item) || thumbIcon(item.category))
+      : thumbIcon(item.category)
 
     el.innerHTML = `
       <div class="thumb">${thumbContent}</div>
       <div class="body">
         <div class="badges">
-          <span class=\"badge brand\">${item.category}</span>
+          <span class="badge brand">${item.category}</span>
           ${prizeBadge}
           ${designBadge}
           ${platformBadge}
-          ${sealedBadge}
         </div>
         <div class="title">${item.name}</div>
-        <div class="meta">${item.year || '—'} • Raridade: ${item.rarity||0}/5 • ${rarityStars}</div>
+        <div class="meta">Raridade: ${item.rarity||0}/5 • ${rarityStars}</div>
         ${item.notes ? `<div class="meta">${item.notes}</div>` : ''}
       </div>
       <div class="footer">
-        <button title="Cadastrar item" onclick="openAddModal()">
+        <button title="Cadastrar item" onclick="openAddModal({name: '${escapeAttr(item.name)}', category: '${escapeAttr(item.category)}'})">
           <i class="fa-solid fa-plus"></i> Cadastrar item
         </button>
-        <button title="Marca/Desmarca selado" onclick="(${toggleSealed})(${item.id})">
-          <i class="fa-solid fa-tag"></i> Selado
+        <button title="Excluir item" onclick="deleteItem(${item.id})">
+          <i class="fa-solid fa-trash"></i> Excluir
         </button>
       </div>
     `
@@ -207,9 +314,10 @@
       case 'Livros': return '📚'
       case 'Trilhas Sonoras': return '🎵'
       case 'Merch': return '🧢'
-      case 'Artbooks': return '🖼️'
+      case 'Artbook/Databook': return '🖼️'
       case 'Cartas': return '🃏'
       case 'Loteria Final Fantasy VII Remake': return '🎟️'
+      case 'Loteria Final Fantasy IX': return '🎟️'
       case 'Loteria Final Fantasy XVI': return '🎟️'
       default: return '🔥'
     }
@@ -217,54 +325,19 @@
   function escapeAttr(str){
     return String(str).replace(/["'\\\n]/g, s => ({'"':'&quot;','\'':'&#39;','\\':'\\\\','\n':'\\n'}[s]))
   }
-  function toggleSealed(id){
-    const idx = state.items.findIndex(i => i.id === id)
-    if (idx > -1){
-      state.items[idx].sealed = !state.items[idx].sealed
+
+  function deleteItem(id){
+    const item = state.items.find(i => i.id === id)
+    const ok = confirm(item ? `Excluir "${item.name}"?` : 'Excluir item?')
+    if (!ok) return
+    const before = state.items.length
+    state.items = state.items.filter(i => i.id !== id)
+    if (state.items.length !== before){
+      saveItems()
       applyFilters()
     }
   }
-  // expõe para onclick
-  window.toggleSealed = toggleSealed
-
-  function prizeLevel(item){
-    // Apenas para categorias de loteria
-    if (!item || !item.category || !/^Loteria /.test(item.category)) return ''
-    if (item.prizeLevel) return item.prizeLevel
-    const n = (item.name || '').toLowerCase()
-    // Last prize
-    if (n.includes('prêmio last') || n.includes('end prize') || n.includes('prêmio raro')) return 'Last'
-    // Match "Prêmio A:" / "Prêmios D:" etc.
-    const m = n.match(/pr[eê]m(?:io|ios)\s*([a-g])/i)
-    if (m && m[1]) return m[1].toUpperCase()
-    return ''
-  }
-
-  // Detecta o "design" do Prêmio B (FFXVI) a partir do nome
-  function ffxviPrizeBDesign(item){
-    if (!item || item.category !== 'Loteria Final Fantasy XVI') return ''
-    const n = (item.name||'')
-    if (!/Prêmio\s*B/i.test(n)) return ''
-    // Ex.: "Prêmio B: Figure Collection — Ifrit"
-    const m = n.match(/—\s*([A-Za-zÀ-ÿ]+)/)
-    return m && m[1] ? m[1] : ''
-  }
-
-  // Ícone padrão por design quando não há imagem
-  function designIcon(item){
-    const d = ffxviPrizeBDesign(item)
-    switch((d||'').toLowerCase()){
-      case 'ifrit': return '🔥'
-      case 'phoenix': return '🐦'
-      case 'shiva': return '❄️'
-      case 'ramuh': return '⚡'
-      case 'garuda': return '🌪️'
-      case 'titan': return '🗿'
-      case 'bahamut': return '🐉'
-      case 'odin': return '🗡️'
-      default: return ''
-    }
-  }
+  window.deleteItem = deleteItem
 
   // ----- Adicionar Item -----
   function prepareAddModal(){
@@ -275,72 +348,63 @@
     const closeBtn = document.getElementById('closeAddModal')
     const cancelBtn = document.getElementById('cancelAddBtn')
     const imageInput = document.getElementById('imageInput')
-    const clearImageBtn = document.getElementById('clearImageBtn')
     const preview = document.getElementById('imagePreview')
     const catSelect = document.getElementById('addCategory')
+    const nameInput = form ? form.querySelector('input[name="name"]') : null
 
-    // Preencher categorias (exceto "Todos")
-    catSelect.innerHTML = ''
-    state.categories.filter(c => c !== 'Todos').forEach(c => {
-      const opt = document.createElement('option')
-      opt.value = c
-      opt.textContent = c
-      catSelect.appendChild(opt)
-    })
-
-    // Estados locais do modal
-    let currentImageData = ''
-
-    function resetForm(){
-      form.reset()
-      currentImageData = ''
-      preview.innerHTML = '<i class="fa-regular fa-image"></i>'
+    // Preenche categorias (sem 'Todos')
+    if (catSelect){
+      catSelect.innerHTML = state.categories
+        .filter(c => c !== 'Todos')
+        .map(c => `<option value="${c}">${c}</option>`)
+        .join('')
     }
 
-    function show(){ modal.hidden = false; modal.setAttribute('aria-hidden','false') }
-    function hide(){ modal.hidden = true; modal.setAttribute('aria-hidden','true'); resetForm() }
+    let currentImageData = ''
+    let defaultValues = { name: '', category: '' }
 
-    // Expor para handlers
-    window.openAddModal = () => { show() }
+    function resetForm(){
+      if (form) form.reset()
+      currentImageData = ''
+      if (preview) preview.innerHTML = '<i class="fa-regular fa-image"></i>'
+    }
+    function show(){
+      modal.hidden = false; modal.setAttribute('aria-hidden','false')
+      if (nameInput) nameInput.value = defaultValues.name || ''
+      if (catSelect){
+        const preferred = defaultValues.category || (state.activeCategory !== 'Todos' ? state.activeCategory : '')
+        if (preferred) catSelect.value = preferred
+      }
+      if (nameInput) nameInput.focus()
+    }
+    function hide(){ modal.hidden = true; modal.setAttribute('aria-hidden','true'); resetForm() }
     function onClose(){ hide() }
 
-    // Eventos
     if (closeBtn) closeBtn.addEventListener('click', onClose)
     if (cancelBtn) cancelBtn.addEventListener('click', onClose)
-    modal.addEventListener('click', (e)=>{ if (e.target === modal) onClose() })
 
     if (imageInput){
-      imageInput.addEventListener('change', (e)=>{
+      imageInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0]
-        if (!file) return
+        if (!file) { currentImageData = ''; if (preview) preview.innerHTML = '<i class="fa-regular fa-image"></i>'; return }
         const reader = new FileReader()
         reader.onload = () => {
           currentImageData = reader.result
-          preview.innerHTML = `<img src="${currentImageData}" alt="preview" />`
+          if (preview) preview.innerHTML = `<img src="${currentImageData}" alt="preview" />`
         }
         reader.readAsDataURL(file)
       })
     }
-    if (clearImageBtn){
-      clearImageBtn.addEventListener('click', ()=>{
-        currentImageData = ''
-        preview.innerHTML = '<i class="fa-regular fa-image"></i>'
-        if (imageInput) imageInput.value = ''
-      })
-    }
 
     if (form){
-      form.addEventListener('submit', (e)=>{
+      form.addEventListener('submit', (e) => {
         e.preventDefault()
         const fd = new FormData(form)
         const item = {
           id: state.nextId++,
           name: (fd.get('name')||'').toString().trim(),
           category: (fd.get('category')||'').toString(),
-          platform: (fd.get('platform')||'').toString().trim() || undefined,
-          year: fd.get('year') ? Number(fd.get('year')) : undefined,
           rarity: fd.get('rarity') ? Math.max(0, Math.min(5, Number(fd.get('rarity')))) : 0,
-          sealed: !!fd.get('sealed'),
           notes: (fd.get('notes')||'').toString().trim() || undefined,
           image: currentImageData || undefined,
         }
@@ -349,7 +413,8 @@
           return
         }
         state.items.unshift(item)
-        // Se a categoria ativa não for compatível, ajustar para mostrar o item recém adicionado
+        saveItems()
+        // Ajustar categoria ativa para mostrar o item recém adicionado
         if (state.activeCategory !== 'Todos' && state.activeCategory !== item.category){
           state.activeCategory = item.category
           renderCategories()
@@ -358,32 +423,98 @@
         hide()
       })
     }
+
+    // Expor para handlers
+    window.openAddModal = (opts = {}) => {
+      defaultValues = {
+        name: (opts.name || '').toString(),
+        category: (opts.category || '').toString(),
+      }
+      show()
+    }
   }
 
   function openAddModal(){ if (window.openAddModal) window.openAddModal() }
+
+  // Persistência local
+  const STORAGE_KEY = 'ifritInventory.items'
+  function loadItems(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+      return null
+    }catch(e){ return null }
+  }
+  function saveItems(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
+    }catch(e){ /* ignore quota errors */ }
+  }
+
+  // Backup/export/import
+  function exportItems(){
+    const data = JSON.stringify(state.items, null, 2)
+    const blob = new Blob([data], {type:'application/json'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const ts = new Date().toISOString().replace(/[:.]/g,'-')
+    a.href = url
+    a.download = `ifrit-inventory-backup-${ts}.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+  async function importItemsFromFile(file){
+    const text = await file.text()
+    const parsed = JSON.parse(text)
+    if (!Array.isArray(parsed)) throw new Error('Invalid JSON format')
+    // opcional: validação leve
+    state.items = parsed
+    state.nextId = state.items.reduce((m,i)=> Math.max(m, i.id||0), 0) + 1
+    saveItems()
+    renderCategories()
+    applyFilters()
+  }
+
+  // Restaurar banco para os dados de exemplo
+  function resetDatabase(){
+    const ok = confirm('Restaurar o banco de dados para o padrão? Isso substituirá os itens atuais.')
+    if (!ok) return
+    state.items = sampleData()
+    state.nextId = state.items.reduce((m,i)=> Math.max(m, i.id||0), 0) + 1
+    saveItems()
+    renderCategories()
+    applyFilters()
+    alert('Banco restaurado para os dados de exemplo.')
+  }
 
   // Dados de exemplo
   function sampleData(){
     let id = 1
     const next = () => id++
     return [
-      { id: next(), name: 'Final Fantasy VII (PS1) Black Label', category: 'Jogos', platform: 'PS1', year: 1997, sealed: false, rarity: 4, notes: 'Completo, manual incluso' },
-      { id: next(), name: 'Final Fantasy VIII (PS1)', category: 'Jogos', platform: 'PS1', year: 1999, sealed: true, rarity: 3, notes: 'Lacrado, selo original' },
-      { id: next(), name: 'Final Fantasy IX (PS1)', category: 'Jogos', platform: 'PS1', year: 2000, sealed: false, rarity: 3 },
-      { id: next(), name: 'Final Fantasy X (PS2)', category: 'Jogos', platform: 'PS2', year: 2001, sealed: false, rarity: 2 },
-      { id: next(), name: 'Final Fantasy XII Steelbook (PS2)', category: 'Jogos', platform: 'PS2', year: 2006, sealed: false, rarity: 3 },
-      { id: next(), name: 'Final Fantasy XIII Lightning Returns (PS3)', category: 'Jogos', platform: 'PS3', year: 2013, sealed: false, rarity: 2 },
-      { id: next(), name: 'Final Fantasy XV Royal Edition (PS4)', category: 'Jogos', platform: 'PS4', year: 2018, sealed: true, rarity: 2 },
-      { id: next(), name: 'Final Fantasy VII Remake Deluxe (PS4)', category: 'Jogos', platform: 'PS4', year: 2020, sealed: false, rarity: 4, notes: 'Com artbook e trilha' },
-      { id: next(), name: 'Final Fantasy VII Rebirth (PS5)', category: 'Jogos', platform: 'PS5', year: 2024, sealed: false, rarity: 4 },
-      { id: next(), name: 'Final Fantasy XVI Deluxe (PS5)', category: 'Jogos', platform: 'PS5', year: 2023, sealed: true, rarity: 4 },
+      { id: next(), name: 'Final Fantasy VII (PS1) Black Label', category: 'Jogos', platform: 'PS1', year: 1997, rarity: 4, notes: 'Completo, manual incluso' },
+      { id: next(), name: 'Final Fantasy VIII (PS1)', category: 'Jogos', platform: 'PS1', year: 1999, rarity: 3, notes: 'Lacrado, selo original' },
+      { id: next(), name: 'Final Fantasy IX (PS1)', category: 'Jogos', platform: 'PS1', year: 2000, rarity: 3 },
+      { id: next(), name: 'Final Fantasy X (PS2)', category: 'Jogos', platform: 'PS2', year: 2001, rarity: 2 },
+      { id: next(), name: 'Final Fantasy XII Steelbook (PS2)', category: 'Jogos', platform: 'PS2', year: 2006, rarity: 3 },
+      { id: next(), name: 'Final Fantasy XIII Lightning Returns (PS3)', category: 'Jogos', platform: 'PS3', year: 2013, rarity: 2 },
+      { id: next(), name: 'Final Fantasy XV Royal Edition (PS4)', category: 'Jogos', platform: 'PS4', year: 2018, rarity: 2 },
+      { id: next(), name: 'Final Fantasy VII Remake Deluxe (PS4)', category: 'Jogos', platform: 'PS4', year: 2020, rarity: 4, notes: 'Com artbook e trilha' },
+      { id: next(), name: 'Final Fantasy VII Rebirth (PS5)', category: 'Jogos', platform: 'PS5', year: 2024, rarity: 4 },
+      { id: next(), name: 'Final Fantasy XVI Deluxe (PS5)', category: 'Jogos', platform: 'PS5', year: 2023, rarity: 4 },
 
-      { id: next(), name: 'Dicionário de Lore — FF Compendium', category: 'Livros', platform: 'Livro', year: 2016, sealed: false, rarity: 3 },
-      { id: next(), name: 'Final Fantasy Ultimania Archive Vol. 1', category: 'Artbooks', platform: 'Livro', year: 2018, sealed: false, rarity: 4 },
-      { id: next(), name: 'Final Fantasy VII Remake Material Ultimania', category: 'Artbooks', platform: 'Livro', year: 2020, sealed: false, rarity: 5 },
+      { id: next(), name: 'Dicionário de Lore — FF Compendium', category: 'Livros', platform: 'Livro', year: 2016, rarity: 3 },
+      { id: next(), name: 'Final Fantasy Ultimania Archive Vol. 1', category: 'Artbook/Databook', platform: 'Livro', year: 2018, rarity: 4 },
+      { id: next(), name: 'Final Fantasy Ultimania Archive Vol. 2', category: 'Artbook/Databook', platform: 'Livro', rarity: 0 },
+      { id: next(), name: 'Final Fantasy Ultimania Archive Vol. 3', category: 'Artbook/Databook', platform: 'Livro', rarity: 0 },
+      { id: next(), name: 'Final Fantasy VII Remake Material Ultimania', category: 'Artbook/Databook', platform: 'Livro', year: 2020, rarity: 5 },
 
-      { id: next(), name: 'OST Final Fantasy VII Vinyl', category: 'Trilhas Sonoras', platform: 'Merch', year: 2019, sealed: true, rarity: 4 },
-      { id: next(), name: 'FFXIV Shadowbringers OST', category: 'Trilhas Sonoras', platform: 'Merch', year: 2019, sealed: false, rarity: 3 },
+      { id: next(), name: 'OST Final Fantasy VII Vinyl', category: 'Trilhas Sonoras', platform: 'Merch', year: 2019, rarity: 4 },
+      { id: next(), name: 'FFXIV Shadowbringers OST', category: 'Trilhas Sonoras', platform: 'Merch', year: 2019, rarity: 3 },
 
       // Loteria Final Fantasy VII Remake — todos os itens na ordem
       { id: next(), name: 'Prêmio A: Figura de Cloud Strife', category: 'Loteria Final Fantasy VII Remake', platform: 'Merch', year: 2020, rarity: 5, lotteryOrder: 1 },
@@ -422,10 +553,19 @@
       { id: next(), name: 'Prêmio G: Visual Clear Mat (3 designs)', category: 'Loteria Final Fantasy XVI', platform: 'Merch', year: 2023, rarity: 1, lotteryOrder: 14 },
       { id: next(), name: 'Prêmio Last: Shiva Silver Figure', category: 'Loteria Final Fantasy XVI', platform: 'Merch', year: 2023, rarity: 5, lotteryOrder: 15 },
 
-      { id: next(), name: 'Deck Tetra Master (FFIX)', category: 'Cartas', platform: 'Merch', year: 2000, sealed: false, rarity: 4 },
-      { id: next(), name: 'Triple Triad Collection (FFVIII)', category: 'Cartas', platform: 'Merch', year: 1999, sealed: false, rarity: 4 },
-      { id: next(), name: 'Pelúcia Moogle', category: 'Merch', platform: 'Merch', year: 2015, sealed: false, rarity: 2 },
-      { id: next(), name: 'Keychain Cactuar', category: 'Merch', platform: 'Merch', year: 2018, sealed: true, rarity: 1 }
+      // Loteria Final Fantasy IX — baseado em GoNintendo (2025-07-07)
+      { id: next(), name: 'Prêmio A: Pelúcia do Vivi (50 cm)', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 5, lotteryOrder: 1 },
+      { id: next(), name: 'Prêmio B: Trilha Chiptune em CD', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 4, lotteryOrder: 2 },
+      { id: next(), name: 'Prêmio C: Capa de caixa de lenços (couro sintético)', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 3, lotteryOrder: 3 },
+      { id: next(), name: 'Prêmio D: Mini prato — arte de Itahana (1 de 4)', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 3, lotteryOrder: 4 },
+      { id: next(), name: 'Prêmio E: Conjunto de cartões postais (1 de 5) + envelope Mognet', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 2, lotteryOrder: 5 },
+      { id: next(), name: 'Prêmio F: Chaveiro de borracha (1 de 10)', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 1, lotteryOrder: 6 },
+      { id: next(), name: 'Prêmio Last: Tela F3 com arte do elenco (Itahana)', category: 'Loteria Final Fantasy IX', platform: 'Merch', year: 2025, rarity: 5, lotteryOrder: 7 },
+
+      { id: next(), name: 'Deck Tetra Master (FFIX)', category: 'Cartas', platform: 'Merch', year: 2000, rarity: 4 },
+      { id: next(), name: 'Triple Triad Collection (FFVIII)', category: 'Cartas', platform: 'Merch', year: 1999, rarity: 4 },
+      { id: next(), name: 'Pelúcia Moogle', category: 'Merch', platform: 'Merch', year: 2015, rarity: 2 },
+      { id: next(), name: 'Keychain Cactuar', category: 'Merch', platform: 'Merch', year: 2018, rarity: 1 }
     ]
   }
 
