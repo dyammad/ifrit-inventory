@@ -2,153 +2,102 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0f0f13" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ifrit Inventory • Coleção Final Fantasy</title>
   <link rel="stylesheet" href="styles.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/logo-meteor.svg" type="image/svg+xml" />
 </head>
 <body>
-  <!-- Mobile Header -->
-  <header class="mobile-header">
-    <div class="header-top">
-      <div class="brand">
-        <i class="fa-solid fa-fire-flame-curved"></i>
-        <span>Ifrit Inventory</span>
-      </div>
-      <button id="menuToggle" class="menu-toggle" aria-label="Menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo-meteor.svg" alt="Ifrit Inventory" class="logo" width="28" height="28" />
+      <span>Ifrit Inventory</span>
     </div>
-    
-    <!-- Search Bar -->
-    <div class="search-container">
-      <div class="search-input-wrapper">
-        <i class="fa-solid fa-search search-icon"></i>
-        <input id="searchInput" type="search" placeholder="Buscar itens..." />
-        <button id="searchClear" class="search-clear" hidden>
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
+    <div class="actions">
+      <input id="searchInput" type="search" placeholder="Buscar itens (nome, plataforma, notas)" />
+      <select id="sortSelect" title="Ordenar por">
+        <option value="name-asc">Nome (A→Z)</option>
+        <option value="name-desc">Nome (Z→A)</option>
+        <option value="year-desc">Ano (mais novo)</option>
+        <option value="year-asc">Ano (mais antigo)</option>
+        <option value="rarity-desc">Raridade (alta)</option>
+        <option value="rarity-asc">Raridade (baixa)</option>
+        <option value="lottery-asc">Ordem da Loteria</option>
+      </select>
+      <button id="addItemBtn" class="btn primary"><i class="fa-solid fa-plus"></i> Adicionar item</button>
     </div>
   </header>
 
-  <!-- Mobile Navigation Drawer -->
-  <nav id="mobileNav" class="mobile-nav" hidden>
-    <div class="nav-overlay"></div>
-    <div class="nav-drawer">
-      <div class="nav-header">
-        <h3>Navegação</h3>
-        <button id="navClose" class="icon-btn">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Categorias</h3>
+      <nav id="categoryList" class="category-list">
+        <!-- Populado via JS -->
+      </nav>
+
+      <h3>Filtros</h3>
+      <div class="filters">
+        <label class="filter">
+          <span>Compreensivo</span>
+          <select id="platformFilter">
+            <option value="">Todas plataformas</option>
+            <option>PS1</option>
+            <option>PS2</option>
+            <option>PS3</option>
+            <option>PS4</option>
+            <option>PS5</option>
+            <option>Switch</option>
+            <option>PC</option>
+            <option>Livro</option>
+            <option>Merch</option>
+          </select>
+        </label>
       </div>
-      
-      <div class="nav-content">
-        <div class="nav-section">
-          <h4>Categorias</h4>
-          <div id="categoryList" class="category-list">
-            <!-- Populado via JS -->
-          </div>
+    </aside>
+
+    <main class="content">
+      <div class="stats" id="statsBar">
+        <!-- KPIs renderizados via JS -->
+      </div>
+      <div class="backup-bar">
+        <button id="exportBtn" class="btn"><i class="fa-solid fa-download"></i> Exportar JSON</button>
+        <label class="btn">
+          <i class="fa-solid fa-upload"></i> Importar JSON
+          <input id="importInput" type="file" accept="application/json" hidden />
+        </label>
+        <button id="pasteImportBtn" class="btn"><i class="fa-solid fa-clipboard"></i> Colar JSON</button>
+        <button id="resetDbBtn" class="btn danger"><i class="fa-solid fa-database"></i> ATUALIZAR</button>
+        <span class="hint">Dica: arraste um arquivo .json aqui para importar</span>
+      </div>
+      <section class="dashboard" id="lotteryDashboard">
+        <!-- Progresso de loterias renderizado via JS -->
+      </section>
+      <section class="latest" id="latestGallery">
+        <!-- Últimos com foto renderizados via JS -->
+      </section>
+      <section>
+        <div id="itemsGrid" class="grid">
+          <!-- Cards renderizados via JS -->
         </div>
-
-        <div class="nav-section">
-          <h4>Filtros</h4>
-          <div class="filters">
-            <label class="filter">
-              <span>Plataforma</span>
-              <select id="platformFilter">
-                <option value="">Todas</option>
-                <option>PS1</option>
-                <option>PS2</option>
-                <option>PS3</option>
-                <option>PS4</option>
-                <option>PS5</option>
-                <option>Switch</option>
-                <option>PC</option>
-                <option>Livro</option>
-                <option>Merch</option>
-              </select>
-            </label>
-            
-            <label class="filter">
-              <span>Ordenar por</span>
-              <select id="sortSelect">
-                <option value="name-asc">Nome (A→Z)</option>
-                <option value="name-desc">Nome (Z→A)</option>
-                <option value="year-desc">Ano (mais novo)</option>
-                <option value="year-asc">Ano (mais antigo)</option>
-                <option value="rarity-desc">Raridade (alta)</option>
-                <option value="rarity-asc">Raridade (baixa)</option>
-                <option value="lottery-asc">Ordem da Loteria</option>
-              </select>
-            </label>
-          </div>
+        <div id="emptyState" class="empty" hidden>
+          <i class="fa-regular fa-folder-open"></i>
+          <p>Nenhum item encontrado com os filtros atuais.</p>
         </div>
+      </section>
+    </main>
+  </div>
 
-        <div class="nav-section">
-          <h4>Backup</h4>
-          <div class="backup-actions">
-            <button id="exportBtn" class="nav-btn">
-              <i class="fa-solid fa-download"></i>
-              <span>Exportar JSON</span>
-            </button>
-            <label class="nav-btn">
-              <i class="fa-solid fa-upload"></i>
-              <span>Importar JSON</span>
-              <input id="importInput" type="file" accept="application/json" hidden />
-            </label>
-            <button id="resetDbBtn" class="nav-btn danger">
-              <i class="fa-solid fa-database"></i>
-              <span>Restaurar banco</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Stats Cards -->
-    <div class="stats" id="statsBar">
-      <!-- KPIs renderizados via JS -->
-    </div>
-
-    <!-- Lottery Dashboard -->
-    <section class="dashboard" id="lotteryDashboard">
-      <!-- Progresso de loterias renderizado via JS -->
-    </section>
-
-    <!-- Items Grid -->
-    <section class="items-section">
-      <div id="itemsGrid" class="items-grid">
-        <!-- Cards renderizados via JS -->
-      </div>
-      <div id="emptyState" class="empty" hidden>
-        <i class="fa-regular fa-folder-open"></i>
-        <p>Nenhum item encontrado</p>
-      </div>
-    </section>
-  </main>
-
-  <!-- Floating Action Button -->
-  <button id="addItemBtn" class="fab" aria-label="Adicionar item">
-    <i class="fa-solid fa-plus"></i>
-  </button>
+  <footer class="footer">
+    <span>© Ifrit Inventory — Final Fantasy Collection Organizer</span>
+  </footer>
 
   <!-- Modal: Adicionar Item -->
   <div id="addItemModal" class="modal" aria-hidden="true" hidden>
-    <div class="modal-overlay"></div>
     <div class="modal-dialog">
       <div class="modal-header">
         <h3>Adicionar item</h3>
-        <button type="button" class="icon-btn" id="closeAddModal" aria-label="Fechar">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button type="button" class="icon-btn" id="closeAddModal" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="addItemForm" class="modal-body">
         <div class="form-grid">
@@ -166,6 +115,7 @@
             <span>Raridade (0–5)</span>
             <input type="number" name="rarity" min="0" max="5" value="0" />
           </label>
+          
         </div>
 
         <label class="block">
@@ -174,13 +124,11 @@
         </label>
 
         <div class="image-field">
-          <div class="preview" id="imagePreview">
-            <i class="fa-regular fa-image"></i>
-          </div>
+          <div class="preview" id="imagePreview"><i class="fa-regular fa-image"></i></div>
           <div class="image-actions">
             <label class="btn">
-              <i class="fa-solid fa-camera"></i> Tirar foto
-              <input id="imageInput" type="file" accept="image/*" capture="environment" hidden />
+              <i class="fa-solid fa-upload"></i> Selecionar foto
+              <input id="imageInput" type="file" accept="image/*" hidden />
             </label>
           </div>
         </div>
@@ -192,9 +140,6 @@
       </form>
     </div>
   </div>
-
-  <!-- Toast Notifications -->
-  <div id="toastContainer" class="toast-container"></div>
 
   <script src="script.js"></script>
 </body>

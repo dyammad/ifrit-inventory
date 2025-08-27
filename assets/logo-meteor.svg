@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Meteor logo">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0fd2ff"/>
+      <stop offset="1" stop-color="#24d68a"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1d2a3a"/>
+      <stop offset="1" stop-color="#0d1420"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#g2)"/>
+  <!-- tail -->
+  <g transform="translate(32,48)" opacity="0.96">
+    <path d="M400 24 C 280 64, 220 92, 160 132 C 122 156, 92 188, 68 228 C 52 256, 40 288, 38 324 C 62 302, 88 286, 118 274 C 148 262, 182 254, 220 252 C 258 250, 298 254, 338 264 C 356 232, 368 202, 380 170 C 392 138, 402 104, 400 24 Z" fill="url(#g1)"/>
+    <path d="M380 70 C 302 100, 254 120, 208 148 C 184 162, 162 182, 144 206 C 168 194, 194 186, 222 182 C 250 178, 280 178, 312 182 C 330 148, 352 110, 380 70 Z" fill="#53e1c0" opacity="0.75"/>
+    <circle cx="412" cy="10" r="6" fill="#53e1c0"/>
+  </g>
+  <!-- core -->
+  <g transform="translate(70,120)">
+    <circle cx="210" cy="210" r="150" fill="url(#g1)" stroke="#0a0f18" stroke-width="8"/>
+    <!-- inner shadows/shine -->
+    <path d="M120 210c0-66 54-120 120-120 42 0 80 22 102 54-20-84-98-124-164-104-80 24-120 110-96 190 8-10 18-16 38-20z" fill="#ffffff" opacity="0.12" filter="url(#soft)"/>
+    <!-- craters -->
+    <circle cx="140" cy="170" r="18" fill="#0a0f18" opacity="0.4"/>
+    <circle cx="195" cy="260" r="12" fill="#0a0f18" opacity="0.32"/>
+    <circle cx="250" cy="190" r="10" fill="#0a0f18" opacity="0.28"/>
+    <!-- streaks on core -->
+    <path d="M90 230c38-30 88-44 146-42" stroke="#0a0f18" stroke-width="8" stroke-linecap="round" opacity="0.28"/>
+    <path d="M100 260c44-20 92-26 144-18" stroke="#0a0f18" stroke-width="7" stroke-linecap="round" opacity="0.22"/>
+  </g>
+</svg>
