@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="description" content="Insights inteligentes da sua coleção de Final Fantasy com IA">
+  <meta name="theme-color" content="#ff4d2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>AI Insights - Ifrit Inventory</title>
+  <link rel="stylesheet" href="ai-insights.css">
+  <link rel="stylesheet" href="../responsive.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1><i class="fa-solid fa-brain"></i> AI Insights Dashboard</h1>
+      <p>Análises inteligentes da sua coleção</p>
+      <button id="refreshInsights" class="btn primary">
+        <i class="fa-solid fa-rotate"></i> Atualizar Insights
+      </button>
+    </header>
+
+    <!-- Recomendações -->
+    <section class="insights-section">
+      <h2><i class="fa-solid fa-lightbulb"></i> Recomendações Personalizadas</h2>
+      <div id="recommendations" class="recommendations-grid">
+        <div class="loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Analisando sua coleção...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Análise de Tendências -->
+    <section class="insights-section">
+      <h2><i class="fa-solid fa-chart-line"></i> Análise de Tendências</h2>
+      <div id="trends" class="trends-container">
+        <div class="loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sugestão de Organização -->
+    <section class="insights-section">
+      <h2><i class="fa-solid fa-layer-group"></i> Sugestão de Organização</h2>
+      <div id="organization" class="organization-card">
+        <div class="loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Análise de Valor -->
+    <section class="insights-section">
+      <h2><i class="fa-solid fa-coins"></i> Análise de Valor de Mercado</h2>
+      <div id="valueAnalysis" class="value-grid">
+        <div class="loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reconhecimento de Imagem -->
+    <section class="insights-section">
+      <h2><i class="fa-solid fa-camera"></i> Adicionar Item por Foto (IA)</h2>
+      <div class="image-upload-zone" id="imageUploadZone">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <p>Arraste uma foto ou clique para selecionar</p>
+        <p class="hint">A IA identificará automaticamente o jogo/item</p>
+        <input type="file" id="imageUpload" accept="image/*" hidden>
+      </div>
+      <div id="imageAnalysisResult" class="analysis-result" hidden></div>
+    </section>
+  </div>
+
+  <script src="ai-insights.js"></script>
+</body>
+</html>

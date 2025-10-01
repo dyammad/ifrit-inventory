@@ -1,0 +1,851 @@
+/* ========================================
+   IFRIT INVENTORY - SISTEMA RESPONSIVO
+   Mobile-First Design com Breakpoints
+   ======================================== */
+
+/* Variáveis para breakpoints */
+:root {
+  --mobile-s: 320px;
+  --mobile-m: 375px;
+  --mobile-l: 425px;
+  --tablet: 768px;
+  --laptop: 1024px;
+  --laptop-l: 1440px;
+  --desktop: 2560px;
+}
+
+/* ========================================
+   BASE - Mobile First (320px+)
+   ======================================== */
+
+/* Garantir que tudo seja fluido */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Imagens responsivas */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ========================================
+   TOPBAR RESPONSIVA
+   ======================================== */
+
+.topbar {
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  gap: 12px;
+}
+
+.brand {
+  flex: 1 1 auto;
+  min-width: 150px;
+}
+
+.brand .logo {
+  width: 24px;
+  height: 24px;
+}
+
+.actions {
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topbar input[type="search"],
+.topbar select {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 140px;
+  font-size: 14px;
+  padding: 10px;
+}
+
+.topbar .btn {
+  flex: 1 1 100%;
+  justify-content: center;
+  font-size: 14px;
+  padding: 12px;
+}
+
+/* ========================================
+   LAYOUT RESPONSIVO
+   ======================================== */
+
+.layout {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 0 12px;
+  margin: 12px auto;
+}
+
+.sidebar {
+  order: 2;
+  padding: 12px;
+}
+
+.content {
+  order: 1;
+}
+
+/* ========================================
+   STATS CARDS
+   ======================================== */
+
+.stats {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.stat {
+  padding: 12px;
+}
+
+.stat .label {
+  font-size: 11px;
+}
+
+.stat .value {
+  font-size: 18px;
+}
+
+/* ========================================
+   GRID DE ITENS
+   ======================================== */
+
+.grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.card .thumb {
+  aspect-ratio: 16/9;
+  min-height: 180px;
+}
+
+.card .body {
+  padding: 12px;
+}
+
+.card .title {
+  font-size: 16px;
+}
+
+.card .meta {
+  font-size: 12px;
+}
+
+/* ========================================
+   DASHBOARD
+   ======================================== */
+
+.dashboard {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.dash-card {
+  padding: 12px;
+}
+
+/* ========================================
+   LATEST GALLERY
+   ======================================== */
+
+.latest {
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.latest-item {
+  flex: 0 0 70px;
+  width: 70px;
+  height: 70px;
+}
+
+/* ========================================
+   MODAL RESPONSIVO
+   ======================================== */
+
+.modal {
+  padding: 8px;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 10;
+}
+
+.modal-body {
+  padding: 12px;
+}
+
+.modal-footer {
+  padding: 12px;
+  flex-direction: column-reverse;
+  gap: 8px;
+}
+
+.modal-footer .btn {
+  width: 100%;
+}
+
+.form-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* ========================================
+   IMAGE FIELD
+   ======================================== */
+
+.image-field {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.image-field .preview {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   BACKUP BAR
+   ======================================== */
+
+.backup-bar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.backup-bar .btn {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 140px;
+  font-size: 13px;
+  padding: 10px 8px;
+}
+
+.backup-bar .hint {
+  flex: 1 1 100%;
+  text-align: center;
+  font-size: 11px;
+}
+
+/* ========================================
+   ACHIEVEMENTS
+   ======================================== */
+
+.achievements-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.achievement-card {
+  padding: 10px;
+}
+
+.achievement-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+}
+
+.achievement-title {
+  font-size: 14px;
+}
+
+.achievement-desc {
+  font-size: 11px;
+}
+
+/* ========================================
+   TOAST NOTIFICATIONS
+   ======================================== */
+
+.achievement-toast {
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  max-width: none;
+  padding: 12px;
+}
+
+/* ========================================
+   CHATBOT MOBILE
+   ======================================== */
+
+.chatbot-toggle {
+  bottom: 16px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.chatbot-window {
+  bottom: 80px;
+  right: 8px;
+  left: 8px;
+  width: auto;
+  height: calc(100vh - 100px);
+  max-height: 600px;
+}
+
+.chatbot-header {
+  padding: 12px;
+}
+
+.chatbot-title {
+  font-size: 14px;
+}
+
+.chat-messages {
+  padding: 12px;
+  gap: 12px;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.message-content {
+  max-width: 85%;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.quick-suggestions {
+  padding: 8px 12px;
+  gap: 6px;
+}
+
+.suggestion-chip {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.chatbot-footer {
+  padding: 12px;
+}
+
+#chatInput {
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.icon-btn.primary {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+/* ========================================
+   AI INSIGHTS MOBILE
+   ======================================== */
+
+.page-header h1 {
+  font-size: 24px;
+}
+
+.page-header p {
+  font-size: 14px;
+}
+
+.insights-section {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.insights-section h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.recommendations-grid,
+.trends-container,
+.value-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.recommendation-card,
+.trend-card,
+.value-card {
+  padding: 16px;
+}
+
+.image-upload-zone {
+  padding: 32px 16px;
+}
+
+.image-upload-zone i {
+  font-size: 48px;
+}
+
+.image-upload-zone p {
+  font-size: 16px;
+}
+
+/* ========================================
+   TABLET (768px+)
+   ======================================== */
+
+@media (min-width: 768px) {
+  /* Topbar */
+  .topbar {
+    flex-wrap: nowrap;
+    padding: 14px 18px;
+  }
+
+  .actions {
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+  }
+
+  .topbar input[type="search"],
+  .topbar select {
+    flex: 0 1 auto;
+    min-width: 200px;
+  }
+
+  .topbar .btn {
+    flex: 0 1 auto;
+    padding: 10px 16px;
+  }
+
+  /* Layout */
+  .layout {
+    padding: 0 16px;
+    margin: 16px auto;
+  }
+
+  /* Stats */
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 14px;
+  }
+
+  .stat .value {
+    font-size: 20px;
+  }
+
+  /* Grid */
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Dashboard */
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Latest */
+  .latest {
+    flex-wrap: wrap;
+  }
+
+  .latest-item {
+    flex: 0 0 80px;
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Modal */
+  .modal {
+    padding: 16px;
+  }
+
+  .modal-dialog {
+    max-width: 600px;
+  }
+
+  .modal-footer {
+    flex-direction: row;
+  }
+
+  .modal-footer .btn {
+    width: auto;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Backup bar */
+  .backup-bar .btn {
+    flex: 0 1 auto;
+  }
+
+  .backup-bar .hint {
+    flex: 0 1 auto;
+  }
+
+  /* Achievements */
+  .achievements-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Chatbot */
+  .chatbot-window {
+    right: 24px;
+    left: auto;
+    width: 400px;
+    height: 600px;
+  }
+
+  /* AI Insights */
+  .recommendations-grid,
+  .trends-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .value-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================
+   LAPTOP (1024px+)
+   ======================================== */
+
+@media (min-width: 1024px) {
+  /* Layout com sidebar */
+  .layout {
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+  }
+
+  .sidebar {
+    order: 1;
+    padding: 16px;
+  }
+
+  .content {
+    order: 2;
+  }
+
+  /* Grid */
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Modal */
+  .modal-dialog {
+    max-width: 720px;
+  }
+
+  /* Achievements */
+  .achievements-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* AI Insights */
+  .recommendations-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .trends-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ========================================
+   DESKTOP (1280px+)
+   ======================================== */
+
+@media (min-width: 1280px) {
+  /* Grid */
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Achievements */
+  .achievements-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* AI Insights */
+  .recommendations-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========================================
+   LARGE DESKTOP (1920px+)
+   ======================================== */
+
+@media (min-width: 1920px) {
+  .layout {
+    max-width: 1600px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .stats {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .recommendations-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ========================================
+   ORIENTAÇÃO LANDSCAPE (Mobile)
+   ======================================== */
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .chatbot-window {
+    height: calc(100vh - 60px);
+    max-height: none;
+  }
+
+  .modal-dialog {
+    max-height: 85vh;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================
+   TOUCH DEVICES - Melhorias de UX
+   ======================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Aumentar áreas de toque */
+  .btn,
+  .icon-btn,
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remover hover effects */
+  .btn:hover,
+  .icon-btn:hover,
+  .card:hover {
+    transform: none;
+  }
+
+  /* Melhorar scroll em listas */
+  .latest,
+  .chat-messages {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Feedback visual ao tocar */
+  .btn:active,
+  .icon-btn:active,
+  button:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* ========================================
+   MODO ESCURO FORÇADO (Sistema)
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Já está em dark mode por padrão */
+}
+
+/* ========================================
+   REDUÇÃO DE MOVIMENTO (Acessibilidade)
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .chatbot-toggle {
+    animation: none;
+  }
+}
+
+/* ========================================
+   ALTO CONTRASTE (Acessibilidade)
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --border: #555;
+    --text: #fff;
+    --muted: #ccc;
+  }
+
+  .btn,
+  .card,
+  .modal-dialog {
+    border-width: 2px;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  .topbar,
+  .sidebar,
+  .backup-bar,
+  .modal,
+  .chatbot-toggle,
+  .chatbot-window,
+  .btn,
+  button {
+    display: none !important;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* ========================================
+   UTILITIES RESPONSIVAS
+   ======================================== */
+
+/* Esconder em mobile */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
+/* Esconder em desktop */
+.hide-desktop {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .hide-desktop {
+    display: none;
+  }
+}
+
+/* Texto responsivo */
+.text-responsive {
+  font-size: clamp(14px, 2vw, 18px);
+}
+
+/* Container fluido */
+.container-fluid {
+  width: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+@media (min-width: 768px) {
+  .container-fluid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-fluid {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* Espaçamento responsivo */
+.gap-responsive {
+  gap: clamp(8px, 2vw, 16px);
+}
+
+/* ========================================
+   MELHORIAS DE PERFORMANCE
+   ======================================== */
+
+/* GPU acceleration para animações */
+.chatbot-toggle,
+.modal,
+.achievement-toast {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Lazy loading de imagens */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}

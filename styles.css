@@ -113,6 +113,49 @@ body{
 .card .footer{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-top:1px solid var(--border)}
 .card button{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
 
+/* List mode */
+.list{display:flex;flex-direction:column;gap:10px}
+.list-item{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.list-item .main{display:grid;grid-template-columns:auto 84px 1fr auto;align-items:center;gap:12px;padding:10px 12px;cursor:pointer}
+.list-item .check{display:flex;align-items:center;justify-content:center;width:36px}
+.list-item .check input{width:18px;height:18px;cursor:pointer}
+.list-item .thumb{width:84px;height:56px;border:1px solid var(--border);border-radius:8px;background:linear-gradient(180deg,#1f2333,#151827);display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden}
+.list-item .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.list-item .info{display:flex;flex-direction:column;gap:6px}
+.list-item .meta-small{color:var(--muted);font-size:12px}
+.list-item .details{display:none;padding:10px 12px;border-top:1px solid var(--border);background:var(--panel)}
+.list-item.open .details{display:block}
+.list-item .actions{display:flex;gap:8px;margin-top:8px}
+.list-item .row-btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+.list-item .row-btn.danger{border-color:var(--danger);color:#ffd6d6}
+
+/* Achievements */
+.achievements-section{margin-bottom:20px}
+.achievements-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.achievements-header h3{margin:0;color:var(--text);font-size:18px}
+.achievements-progress{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.achievements-progress span{color:var(--muted);font-size:12px}
+.achievements-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.achievement-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);position:relative}
+.achievement-card.locked{opacity:0.6}
+.achievement-card.unlocked{border-color:var(--ok);background:rgba(41,199,111,.05)}
+.achievement-icon{font-size:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--panel-2);border-radius:50%;border:1px solid var(--border)}
+.achievement-card.unlocked .achievement-icon{background:rgba(41,199,111,.15);border-color:var(--ok)}
+.achievement-info{flex:1}
+.achievement-title{font-weight:700;color:var(--text);margin-bottom:4px}
+.achievement-desc{color:var(--muted);font-size:12px;margin-bottom:4px}
+.achievement-progress{color:var(--accent);font-size:11px;font-weight:500}
+.achievement-badge{position:absolute;top:8px;right:8px;background:var(--ok);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+
+/* Achievement Toast */
+.achievement-toast{position:fixed;top:20px;right:20px;background:var(--panel);border:2px solid var(--ok);border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,.4);z-index:1000;max-width:350px;transform:translateX(100%);opacity:0;transition:all 0.3s ease}
+.achievement-toast.show{transform:translateX(0);opacity:1}
+.achievement-toast .achievement-icon{font-size:28px;background:rgba(41,199,111,.15);border:2px solid var(--ok)}
+.achievement-toast .achievement-content{flex:1}
+.achievement-toast .achievement-title{color:var(--ok);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.achievement-toast .achievement-name{color:var(--text);font-weight:700;margin-bottom:2px}
+.achievement-toast .achievement-desc{color:var(--muted);font-size:12px}
+
 .empty{display:flex;gap:10px;align-items:center;justify-content:center;flex-direction:column;border:1px dashed var(--border);border-radius:12px;padding:30px;color:var(--muted);background:var(--panel)}
 .footer{max-width:1280px;margin:0 auto;padding:16px 14px;color:var(--muted)}
 

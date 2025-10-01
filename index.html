@@ -2,21 +2,56 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="description" content="Gerencie sua coleção de Final Fantasy com IA - Reconhecimento de imagem, chatbot inteligente e recomendações personalizadas" />
+  <meta name="keywords" content="Final Fantasy, inventário, coleção, IA, chatbot, reconhecimento de imagem" />
+  <meta name="author" content="Ifrit Inventory" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ifrit Inventory • Coleção Final Fantasy" />
+  <meta property="og:description" content="Gerencie sua coleção de Final Fantasy com IA" />
+  <meta property="og:image" content="assets/logo-meteor.svg" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ifrit Inventory • Coleção Final Fantasy" />
+  <meta name="twitter:description" content="Gerencie sua coleção de Final Fantasy com IA" />
+  
+  <!-- Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ifrit Inventory" />
+  
   <title>Ifrit Inventory • Coleção Final Fantasy</title>
+  
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="responsive.css" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="user-management.css" />
+  <link rel="stylesheet" href="public-registration.css" />
+  <link rel="stylesheet" href="item-approval.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+  
+  <!-- Icons & Manifest -->
   <link rel="icon" href="assets/logo-meteor.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ff4d2e" />
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <img src="assets/logo-meteor.svg" alt="Ifrit Inventory" class="logo" width="28" height="28" />
+      <img src="assets/logo-meteor.svg" alt="Ifrit Inventory" class="logo" width="28" height="28" loading="eager" />
       <span>Ifrit Inventory</span>
     </div>
     <div class="actions">
-      <input id="searchInput" type="search" placeholder="Buscar itens (nome, plataforma, notas)" />
-      <select id="sortSelect" title="Ordenar por">
+      <input id="searchInput" type="search" placeholder="Buscar itens..." aria-label="Buscar itens" />
+      <select id="sortSelect" title="Ordenar por" aria-label="Ordenar por">
         <option value="name-asc">Nome (A→Z)</option>
         <option value="name-desc">Nome (Z→A)</option>
         <option value="year-desc">Ano (mais novo)</option>
@@ -25,7 +60,11 @@
         <option value="rarity-asc">Raridade (baixa)</option>
         <option value="lottery-asc">Ordem da Loteria</option>
       </select>
-      <button id="addItemBtn" class="btn primary"><i class="fa-solid fa-plus"></i> Adicionar item</button>
+      <button id="addItemBtn" class="btn primary" aria-label="Adicionar novo item">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> 
+        <span class="hide-mobile">Adicionar</span>
+        <span class="hide-desktop">Novo</span>
+      </button>
     </div>
   </header>
 
@@ -75,6 +114,9 @@
       </section>
       <section class="latest" id="latestGallery">
         <!-- Últimos com foto renderizados via JS -->
+      </section>
+      <section id="achievementsSection" class="achievements-section">
+        <!-- Conquistas renderizadas via JS -->
       </section>
       <section>
         <div id="itemsGrid" class="grid">
@@ -141,6 +183,18 @@
     </div>
   </div>
 
+  <script src="auth.js"></script>
+  <script src="user-management.js"></script>
+  <script src="public-registration.js"></script>
+  <script src="item-approval.js"></script>
   <script src="script.js"></script>
+  <script src="auth-integration.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.error)
+      })
+    }
+  </script>
 </body>
 </html>

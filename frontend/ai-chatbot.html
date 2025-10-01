@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="description" content="Chatbot inteligente para gerenciar sua coleção de Final Fantasy">
+  <meta name="theme-color" content="#ff4d2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Ifrit AI Assistant</title>
+  <link rel="stylesheet" href="ai-chatbot.css">
+  <link rel="stylesheet" href="../responsive.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Botão flutuante do chatbot -->
+  <button id="chatbotToggle" class="chatbot-toggle" aria-label="Abrir assistente IA">
+    <i class="fa-solid fa-robot"></i>
+  </button>
+
+  <!-- Janela do chatbot -->
+  <div id="chatbotWindow" class="chatbot-window" hidden>
+    <div class="chatbot-header">
+      <div class="chatbot-title">
+        <i class="fa-solid fa-robot"></i>
+        <span>Ifrit AI Assistant</span>
+        <span class="status-indicator online"></span>
+      </div>
+      <div class="chatbot-actions">
+        <button id="clearChat" class="icon-btn" title="Limpar conversa">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+        <button id="closeChat" class="icon-btn" title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="chatbot-body">
+      <div id="chatMessages" class="chat-messages">
+        <!-- Mensagem de boas-vindas -->
+        <div class="message assistant">
+          <div class="message-avatar">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="message-content">
+            <p>Olá! 👋 Sou o Ifrit Assistant, seu ajudante de IA para gerenciar sua coleção de Final Fantasy.</p>
+            <p>Posso ajudar você a:</p>
+            <ul>
+              <li>Adicionar itens por voz ou texto</li>
+              <li>Buscar e organizar sua coleção</li>
+              <li>Recomendar próximas compras</li>
+              <li>Analisar valor e raridade</li>
+            </ul>
+            <p>Como posso ajudar?</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sugestões rápidas -->
+      <div id="quickSuggestions" class="quick-suggestions">
+        <button class="suggestion-chip">Mostre meus itens mais raros</button>
+        <button class="suggestion-chip">O que devo comprar?</button>
+        <button class="suggestion-chip">Quanto vale minha coleção?</button>
+        <button class="suggestion-chip">Organize por raridade</button>
+      </div>
+    </div>
+
+    <div class="chatbot-footer">
+      <div class="input-container">
+        <button id="voiceInput" class="icon-btn" title="Entrada por voz">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <input 
+          type="text" 
+          id="chatInput" 
+          placeholder="Digite sua mensagem ou comando..."
+          autocomplete="off"
+        />
+        <button id="sendMessage" class="icon-btn primary" title="Enviar">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="typing-indicator" hidden>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="ai-chatbot.js"></script>
+</body>
+</html>

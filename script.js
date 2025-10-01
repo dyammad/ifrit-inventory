@@ -21,7 +21,180 @@
     activeCategory: 'Todos',
     query: '',
     sort: 'name-asc',
-    platform: ''
+    platform: '',
+    achievements: [],
+    unlockedAchievements: []
+  }
+
+  // Sistema de Conquistas
+  const achievements = [
+    {
+      id: 'ps1_collector',
+      title: 'Colecionador PS1',
+      description: 'Colete todos os jogos de PS1',
+      icon: '🎮',
+      check: () => {
+        const ps1Games = state.items.filter(i => i.platform === 'PS1' && i.category === 'Jogos')
+        const ownedPs1 = ps1Games.filter(i => i.owned)
+        return ps1Games.length > 0 && ownedPs1.length === ps1Games.length
+      }
+    },
+    {
+      id: 'ps2_collector',
+      title: 'Colecionador PS2',
+      description: 'Colete todos os jogos de PS2',
+      icon: '🎮',
+      check: () => {
+        const ps2Games = state.items.filter(i => i.platform === 'PS2' && i.category === 'Jogos')
+        const ownedPs2 = ps2Games.filter(i => i.owned)
+        return ps2Games.length > 0 && ownedPs2.length === ps2Games.length
+      }
+    },
+    {
+      id: 'ff7r_lottery_f',
+      title: 'Colecionador de Toalhas',
+      description: 'Colete todos os Prêmios F da Loteria FFVII Remake',
+      icon: '🏆',
+      check: () => {
+        const prizeF = state.items.filter(i => 
+          i.category === 'Loteria Final Fantasy VII Remake' && 
+          /Prêmio F:/i.test(i.name || '')
+        )
+        const ownedF = prizeF.filter(i => i.owned)
+        return prizeF.length > 0 && ownedF.length === prizeF.length
+      }
+    },
+    {
+      id: 'ff16_lottery_b',
+      title: 'Mestre dos Eikons',
+      description: 'Colete todos os Prêmios B da Loteria FFXVI',
+      icon: '🔥',
+      check: () => {
+        const prizeB = state.items.filter(i => 
+          i.category === 'Loteria Final Fantasy XVI' && 
+          /Prêmio B:/i.test(i.name || '')
+        )
+        const ownedB = prizeB.filter(i => i.owned)
+        return prizeB.length > 0 && ownedB.length === prizeB.length
+      }
+    },
+    {
+      id: 'music_box_collector',
+      title: 'Maestro das Melodias',
+      description: 'Colete todas as Music Boxes',
+      icon: '🎶',
+      check: () => {
+        const musicBoxes = state.items.filter(i => i.category === 'Music Box')
+        const ownedBoxes = musicBoxes.filter(i => i.owned)
+        return musicBoxes.length > 0 && ownedBoxes.length === musicBoxes.length
+      }
+    },
+    {
+      id: 'ultimania_collector',
+      title: 'Estudioso de Ultimania',
+      description: 'Colete todos os volumes do Ultimania Archive',
+      icon: '📚',
+      check: () => {
+        const ultimanias = state.items.filter(i => 
+          i.category === 'Artbook/Databook' && 
+          /Ultimania Archive Vol\./i.test(i.name || '')
+        )
+        const ownedUltimanias = ultimanias.filter(i => i.owned)
+        return ultimanias.length > 0 && ownedUltimanias.length === ultimanias.length
+      }
+    },
+    {
+      id: 'rarity_5_collector',
+      title: 'Caçador de Raridades',
+      description: 'Colete 10 itens de raridade 5',
+      icon: '⭐',
+      check: () => {
+        const rarity5Items = state.items.filter(i => (i.rarity || 0) === 5 && i.owned)
+        return rarity5Items.length >= 10
+      }
+    },
+    {
+      id: 'first_steps',
+      title: 'Primeiros Passos',
+      description: 'Marque seu primeiro item como coletado',
+      icon: '🌟',
+      check: () => {
+        const ownedItems = state.items.filter(i => i.owned)
+        return ownedItems.length >= 1
+      }
+    },
+    {
+      id: 'collector_milestone_50',
+      title: 'Colecionador Dedicado',
+      description: 'Colete 50 itens',
+      icon: '🏅',
+      check: () => {
+        const ownedItems = state.items.filter(i => i.owned)
+        return ownedItems.length >= 50
+      }
+    },
+    {
+      id: 'ff9_lottery_complete',
+      title: 'Memórias de Alexandria',
+      description: 'Complete toda a Loteria Final Fantasy IX',
+      icon: '👑',
+      check: () => {
+        const ff9Items = state.items.filter(i => i.category === 'Loteria Final Fantasy IX')
+        const ownedFF9 = ff9Items.filter(i => i.owned)
+        return ff9Items.length > 0 && ownedFF9.length === ff9Items.length
+      }
+    }
+  ]
+
+  function checkAchievements() {
+    const newlyUnlocked = []
+    
+    achievements.forEach(achievement => {
+      const isUnlocked = state.unlockedAchievements.includes(achievement.id)
+      const shouldUnlock = achievement.check()
+      
+      if (shouldUnlock && !isUnlocked) {
+        state.unlockedAchievements.push(achievement.id)
+        newlyUnlocked.push(achievement)
+      }
+    })
+    
+    if (newlyUnlocked.length > 0) {
+      saveAchievements()
+      showAchievementNotifications(newlyUnlocked)
+    }
+  }
+
+  function showAchievementNotifications(achievements) {
+    achievements.forEach((achievement, index) => {
+      setTimeout(() => {
+        showAchievementToast(achievement)
+      }, index * 1000)
+    })
+  }
+
+  function showAchievementToast(achievement) {
+    const toast = document.createElement('div')
+    toast.className = 'achievement-toast'
+    toast.innerHTML = `
+      <div class="achievement-icon">${achievement.icon}</div>
+      <div class="achievement-content">
+        <div class="achievement-title">Conquista Desbloqueada!</div>
+        <div class="achievement-name">${achievement.title}</div>
+        <div class="achievement-desc">${achievement.description}</div>
+      </div>
+    `
+    
+    document.body.appendChild(toast)
+    
+    // Animação de entrada
+    setTimeout(() => toast.classList.add('show'), 100)
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+      toast.classList.remove('show')
+      setTimeout(() => toast.remove(), 300)
+    }, 5000)
   }
 
   // Helpers
@@ -53,6 +226,14 @@
     state.items.forEach((it, idx) => { if (!it.createdAt) it.createdAt = now - idx * 1000 })
     // Próximo ID baseado no maior existente
     state.nextId = state.items.reduce((m,i)=> Math.max(m, i.id||0), 0) + 1
+    // Carregar conquistas
+    state.unlockedAchievements = loadAchievements()
+    // Migrar: adicionar flag owned (coletado) inferida da existência de imagem, se ainda não houver
+    let migratedOwned = false
+    state.items.forEach(it => {
+      if (typeof it.owned === 'undefined') { it.owned = !!it.image; migratedOwned = true }
+    })
+    if (migratedOwned) { saveItems() }
     // Migração única: apagar todas as fotos existentes
     const MIGRATION_WIPE_PHOTOS_KEY = 'ifritInventory.wipePhotos.m1'
     if (!localStorage.getItem(MIGRATION_WIPE_PHOTOS_KEY)){
@@ -82,7 +263,115 @@
     renderCategories()
     prepareAddModal()
     applyFilters()
+    renderAchievements()
+    // Verificar conquistas iniciais (sem notificações)
+    checkAchievements()
   })
+
+  // Renderizar seção de conquistas
+  function renderAchievements() {
+    const achievementsSection = document.getElementById('achievementsSection')
+    if (!achievementsSection) return
+
+    const unlockedCount = state.unlockedAchievements.length
+    const totalCount = achievements.length
+    const progressPct = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0
+
+    const achievementCards = achievements.map(achievement => {
+      const isUnlocked = state.unlockedAchievements.includes(achievement.id)
+      const progress = getAchievementProgress(achievement)
+      
+      return `
+        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+          <div class="achievement-icon">${achievement.icon}</div>
+          <div class="achievement-info">
+            <div class="achievement-title">${achievement.title}</div>
+            <div class="achievement-desc">${achievement.description}</div>
+            ${progress ? `<div class="achievement-progress">${progress}</div>` : ''}
+          </div>
+          ${isUnlocked ? '<div class="achievement-badge">✓</div>' : ''}
+        </div>
+      `
+    }).join('')
+
+    achievementsSection.innerHTML = `
+      <div class="achievements-header">
+        <h3>Conquistas</h3>
+        <div class="achievements-progress">
+          <span>${unlockedCount}/${totalCount} desbloqueadas (${progressPct}%)</span>
+          <div class="progress">
+            <span style="width: ${progressPct}%"></span>
+          </div>
+        </div>
+      </div>
+      <div class="achievements-grid">
+        ${achievementCards}
+      </div>
+    `
+  }
+
+  function getAchievementProgress(achievement) {
+    switch(achievement.id) {
+      case 'ps1_collector': {
+        const ps1Games = state.items.filter(i => i.platform === 'PS1' && i.category === 'Jogos')
+        const owned = ps1Games.filter(i => i.owned).length
+        return ps1Games.length > 0 ? `${owned}/${ps1Games.length} jogos PS1` : null
+      }
+      case 'ps2_collector': {
+        const ps2Games = state.items.filter(i => i.platform === 'PS2' && i.category === 'Jogos')
+        const owned = ps2Games.filter(i => i.owned).length
+        return ps2Games.length > 0 ? `${owned}/${ps2Games.length} jogos PS2` : null
+      }
+      case 'ff7r_lottery_f': {
+        const prizeF = state.items.filter(i => 
+          i.category === 'Loteria Final Fantasy VII Remake' && 
+          /Prêmio F:/i.test(i.name || '')
+        )
+        const owned = prizeF.filter(i => i.owned).length
+        return prizeF.length > 0 ? `${owned}/${prizeF.length} Prêmios F` : null
+      }
+      case 'ff16_lottery_b': {
+        const prizeB = state.items.filter(i => 
+          i.category === 'Loteria Final Fantasy XVI' && 
+          /Prêmio B:/i.test(i.name || '')
+        )
+        const owned = prizeB.filter(i => i.owned).length
+        return prizeB.length > 0 ? `${owned}/${prizeB.length} Prêmios B` : null
+      }
+      case 'music_box_collector': {
+        const musicBoxes = state.items.filter(i => i.category === 'Music Box')
+        const owned = musicBoxes.filter(i => i.owned).length
+        return musicBoxes.length > 0 ? `${owned}/${musicBoxes.length} Music Boxes` : null
+      }
+      case 'ultimania_collector': {
+        const ultimanias = state.items.filter(i => 
+          i.category === 'Artbook/Databook' && 
+          /Ultimania Archive Vol\./i.test(i.name || '')
+        )
+        const owned = ultimanias.filter(i => i.owned).length
+        return ultimanias.length > 0 ? `${owned}/${ultimanias.length} volumes Ultimania` : null
+      }
+      case 'rarity_5_collector': {
+        const rarity5Items = state.items.filter(i => (i.rarity || 0) === 5 && i.owned)
+        return `${rarity5Items.length}/10 itens raridade 5`
+      }
+      case 'first_steps': {
+        const ownedItems = state.items.filter(i => i.owned)
+        return `${Math.min(ownedItems.length, 1)}/1 item coletado`
+      }
+      case 'collector_milestone_50': {
+        const ownedItems = state.items.filter(i => i.owned)
+        return `${ownedItems.length}/50 itens coletados`
+      }
+      case 'ff9_lottery_complete': {
+        const ff9Items = state.items.filter(i => i.category === 'Loteria Final Fantasy IX')
+        const owned = ff9Items.filter(i => i.owned).length
+        return ff9Items.length > 0 ? `${owned}/${ff9Items.length} itens FFIX` : null
+      }
+      default:
+        return null
+    }
+  }
 
   // UI bindings
   function bindUI(){
@@ -249,13 +538,13 @@
   // KPIs
   function renderStats(){
     const el = document.getElementById('statsBar')
-    // Todas as contagens consideram apenas itens com foto
-    const withPhoto = state.filtered.filter(i => !!i.image)
-    const total = withPhoto.length
-    const avgRarity = withPhoto.length
-      ? (withPhoto.reduce((s,i)=> s + (i.rarity||0), 0) / withPhoto.length)
+    // Todas as contagens consideram apenas itens marcados como coletados
+    const owned = state.filtered.filter(i => !!i.owned)
+    const total = owned.length
+    const avgRarity = owned.length
+      ? (owned.reduce((s,i)=> s + (i.rarity||0), 0) / owned.length)
       : 0
-    const cats = new Set(withPhoto.map(i => i.category))
+    const cats = new Set(owned.map(i => i.category))
 
     el.innerHTML = `
       <div class="stat">
@@ -288,13 +577,13 @@
       const items = state.items.filter(i => i.category === cat)
       const withOrder = items.filter(i => typeof i.lotteryOrder === 'number')
       const expected = withOrder.length ? Math.max(...withOrder.map(i => i.lotteryOrder||0)) : items.length
-      // Coletados contam SOMENTE itens com foto
+      // Coletados contam itens marcados como owned
       let collected
       if (withOrder.length){
-        const distinctWithPhoto = new Set(withOrder.filter(i => !!i.image).map(i => i.lotteryOrder))
-        collected = distinctWithPhoto.size
+        const distinctOwned = new Set(withOrder.filter(i => !!i.owned).map(i => i.lotteryOrder))
+        collected = distinctOwned.size
       } else {
-        collected = items.filter(i => !!i.image).length
+        collected = items.filter(i => !!i.owned).length
       }
       const pct = expected ? Math.min(100, Math.round((collected/expected)*100)) : 0
       return `
@@ -308,10 +597,14 @@
     wrap.innerHTML = cards.join('')
   }
 
-  // Grid
+  // Lista (modo padrão)
   function renderGrid(){
     const grid = document.getElementById('itemsGrid')
     const empty = document.getElementById('emptyState')
+
+    // Forçar modo lista no container
+    if (grid.classList.contains('grid')) grid.classList.remove('grid')
+    grid.classList.add('list')
 
     grid.innerHTML = ''
     if (!state.filtered.length){
@@ -320,7 +613,90 @@
     }
     empty.hidden = true
 
-    state.filtered.forEach(item => grid.appendChild(card(item)))
+    state.filtered.forEach(item => grid.appendChild(listRow(item)))
+  }
+
+  function listRow(item){
+    const el = document.createElement('article')
+    el.className = 'list-item'
+
+    const rarityStars = '★★★★★☆☆☆☆☆'.slice(5 - (item.rarity||0), 10 - (item.rarity||0))
+    const platformBadge = item.platform ? `<span class="badge">${item.platform}</span>` : ''
+    const prize = prizeLevel(item)
+    const tierClass = prize
+      ? (prize.toLowerCase() === 'end'
+          ? 'tier-end'
+          : (/^pr[eê]mio\s+([a-g])/i.test(prize) ? `tier-${prize.replace(/^Pr[eê]mio\s+/i,'').charAt(0).toLowerCase()}` : ''))
+      : ''
+    const prizeBadge = prize ? `<span class="badge prize ${tierClass}">${prize}</span>` : ''
+    const design = ffxviPrizeBDesign(item)
+    const designBadge = design ? `<span class="badge design">${design}</span>` : ''
+    const thumbContent = item.image
+      ? `<img src="${item.image}" alt="${escapeAttr(item.name)}" />`
+      : thumbIcon(item.category)
+
+    el.innerHTML = `
+      <div class="main">
+        <label class="check">
+          <input type="checkbox" ${item.owned ? 'checked' : ''} aria-label="Marcar como na coleção" />
+        </label>
+        <div class="thumb">${thumbContent}</div>
+        <div class="info">
+          <div class="title">${item.name}</div>
+          <div class="badges">
+            <span class="badge brand">${item.category}</span>
+            ${prizeBadge}
+            ${designBadge}
+            ${platformBadge}
+          </div>
+        </div>
+        <div class="meta-small">${item.rarity||0}/5 • ${rarityStars}</div>
+      </div>
+      <div class="details">
+        ${item.notes ? `<div class="meta">${item.notes}</div>` : ''}
+        ${item.year ? `<div class="meta">Ano: ${item.year}</div>` : ''}
+        <div class="actions">
+          <button title="Cadastrar item" class="row-btn" data-action="add"><i class="fa-solid fa-plus"></i> Cadastrar item</button>
+          <button title="Excluir item" class="row-btn danger" data-action="del"><i class="fa-solid fa-trash"></i> Excluir</button>
+        </div>
+      </div>
+    `
+
+    const checkbox = el.querySelector('input[type="checkbox"]')
+    checkbox.addEventListener('click', (e) => {
+      e.stopPropagation()
+    })
+    checkbox.addEventListener('change', () => {
+      item.owned = !!checkbox.checked
+      saveItems()
+      renderStats()
+      renderLotteryDashboard()
+      renderAchievements()
+      checkAchievements()
+    })
+
+    el.addEventListener('click', (e) => {
+      // Ignorar cliques em botões internos
+      const target = e.target
+      if (target.closest && target.closest('button, input, label.check')) return
+      el.classList.toggle('open')
+    })
+
+    const onAction = (action) => {
+      if (action === 'add'){
+        openAddModal({ name: item.name, category: item.category })
+      } else if (action === 'del'){
+        deleteItem(item.id)
+      }
+    }
+    el.querySelectorAll('.row-btn').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation()
+        onAction(btn.getAttribute('data-action'))
+      })
+    })
+
+    return el
   }
 
   // Últimos com foto
@@ -485,6 +861,7 @@
           rarity: fd.get('rarity') ? Math.max(0, Math.min(5, Number(fd.get('rarity')))) : 0,
           notes: (fd.get('notes')||'').toString().trim() || undefined,
           image: currentImageData || undefined,
+          owned: !!currentImageData,
           createdAt: Date.now(),
         }
         if (!item.name || !item.category){
@@ -499,6 +876,8 @@
           renderCategories()
         }
         applyFilters()
+        renderAchievements()
+        checkAchievements()
         hide()
       })
     }
@@ -517,6 +896,8 @@
 
   // Persistência local
   const STORAGE_KEY = 'ifritInventory.items'
+  const ACHIEVEMENTS_KEY = 'ifritInventory.achievements'
+  
   function loadItems(){
     try{
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -526,9 +907,26 @@
       return null
     }catch(e){ return null }
   }
+  
   function saveItems(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
+    }catch(e){ /* ignore quota errors */ }
+  }
+  
+  function loadAchievements(){
+    try{
+      const raw = localStorage.getItem(ACHIEVEMENTS_KEY)
+      if (!raw) return []
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+      return []
+    }catch(e){ return [] }
+  }
+  
+  function saveAchievements(){
+    try{
+      localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(state.unlockedAchievements))
     }catch(e){ /* ignore quota errors */ }
   }
 
